@@ -35,21 +35,17 @@ class Piece:
         self.has_eaten = has_eaten
 
     def get_adjacent_squares(self, board):
-        # Receives a Board object, returns at max four squares, all of which are potential moves
-        current_col = board.get_col_number(int(self.get_position()))
         current_row = board.get_row_number(int(self.get_position()))
-        all_coords = []
+        current_col = board.get_col_number(int(self.get_position()))
 
-        if self.is_king():
-            all_coords = [(current_row - 1, current_col - 1), (current_row - 1, current_col + 1), (current_row + 1, current_col - 1), (current_row + 1, current_col + 1)]
-        else:
-            if board.get_color_up() == self.get_color():
-                all_coords = [(current_row - 1, current_col - 1), (current_row - 1, current_col + 1)]
-            else:
-                all_coords = [(current_row + 1, current_col - 1), (current_row + 1, current_col + 1)]
-        
-        # Because of the offset values above (+1 or -1), it's necessary to check if any invalid coordinates are on the list.
-        return list(filter(lambda coords: coords[0] != -1 and coords[0] != 8 and coords[1] != -1 and coords[1] != 8, all_coords))
+        adjacent_squares = []
+        for dr, dc in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:  # Diagonais
+            new_row, new_col = current_row + dr, current_col + dc
+            if 0 <= new_row < 8 and 0 <= new_col < 8:  # Dentro do tabuleiro
+                adjacent_squares.append((new_row, new_col))
+
+        return adjacent_squares
+
 
     def get_moves(self, board):
         # Receives a board, returns all possible moves.
@@ -64,9 +60,9 @@ class Piece:
                 position_to_eat = (coords[0] + (coords[0] - current_row), coords[1] + 1)
             else:
                 position_to_eat = (coords[0] + (coords[0] - current_row), coords[1] - 1)
-            
+
             position_num = get_position_with_row_col(position_to_eat[0], position_to_eat[1])
-            
+
             return None if board.has_piece(position_num) else position_num
 
         current_col = board.get_col_number(int(self.get_position()))
@@ -76,6 +72,7 @@ class Piece:
 
         possible_coords = self.get_adjacent_squares(board)
 
+        # Get pieces in adjacent squares
         close_squares = board.get_pieces_by_coords(*possible_coords)
         empty_squares = []
 
@@ -87,13 +84,18 @@ class Piece:
                 position_to_eat = get_eat_position(square, possible_coords[index])
                 if position_to_eat is None:
                     continue
-                
+
                 possible_moves.append({"position": str(position_to_eat), "eats_piece": True})
+
+        # Filter empty_squares to avoid out-of-range access
+        empty_squares = [index for index in empty_squares if index < len(possible_coords)]
 
         if len(possible_moves) == 0:
             # This is skipped if this piece can eat any other, because it is forced to eat it.
             for index in empty_squares:
-                new_position = get_position_with_row_col(possible_coords[index][0], possible_coords[index][1])
-                possible_moves.append({"position": str(new_position), "eats_piece": False})
-        
+                # Ensure the index is valid before accessing
+                if index < len(possible_coords):
+                    new_position = get_position_with_row_col(possible_coords[index][0], possible_coords[index][1])
+                    possible_moves.append({"position": str(new_position), "eats_piece": False})
+
         return possible_moves
