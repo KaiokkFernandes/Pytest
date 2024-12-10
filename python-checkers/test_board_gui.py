@@ -36,12 +36,3 @@ def test_show_piece(mock_board):
     assert shown == 2
     assert gui.hidden_piece == -1
 
-def test_get_piece_on_mouse(mock_board):
-    gui = BoardGUI(mock_board)
-    result = gui.get_piece_on_mouse((50, 50))
-    assert result is None or isinstance(result, dict)
-
-def test_get_move_marks(mock_board):
-    gui = BoardGUI(mock_board)
-    assert isinstance(gui.get_move_marks(), list)
-

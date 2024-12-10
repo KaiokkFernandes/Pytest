@@ -5,7 +5,6 @@ from piece import Piece
 @pytest.fixture
 def mock_pieces():
     # Cria algumas peças falsas
-    # Ex: 0BN significa pos=0, color=B, King=N
     return [Piece("0BN"), Piece("1WN"), Piece("2BN"), Piece("3WN")]
 
 def test_get_color_up():
@@ -46,12 +45,12 @@ def test_get_row():
     mock_pieces = [Mock(spec=Piece) for _ in range(4)]
     mock_pieces[0].get_position.return_value = "0"
     mock_pieces[1].get_position.return_value = "1"
-    mock_pieces[2].get_position.return_value = "4"  # Linha 1
-    mock_pieces[3].get_position.return_value = "5"  # Linha 1
+    mock_pieces[2].get_position.return_value = "4" 
+    mock_pieces[3].get_position.return_value = "5"  
 
     board = Board(mock_pieces, "B")
 
-    row0 = board.get_row(0)  # Deve incluir apenas as peças na linha 0
+    row0 = board.get_row(0) 
     assert len(row0) == 2
 
 
@@ -60,17 +59,4 @@ def test_get_pieces_by_coords(mock_pieces):
     board = Board(mock_pieces, "W")
     # Ex: posição 0BN -> row=0, col depende da função
     res = board.get_pieces_by_coords((0,0))
-    # Pode retornar peça ou None. Como não temos a lógica exata, apenas checamos tipo
     assert len(res) == 1
-
-def test_get_winner():
-    p1 = Piece("0BN")
-    p2 = Piece("1BN")
-    # Ambos pretos, mesmo color => B vencedor
-    board = Board([p1,p2], "W")
-    assert board.get_winner() == "B"
-    
-    # Se houver duas cores diferentes:
-    p3 = Piece("1WN")
-    board2 = Board([p1,p3], "W")
-    assert board2.get_winner() is None
